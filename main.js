@@ -14,6 +14,7 @@ let mainWindow
 function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({width: 800, height: 600})
+  const { Menu } = require("electron");
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
@@ -32,7 +33,32 @@ function createWindow () {
     // when you should delete the corresponding element.
     mainWindow = null
   })
+
+  mainWindow.webContents.on("context-menu", (e, props) => {
+    const { canCopy, canCut, canPaste, canSelectAll } = props.editFlags;
+    const menuItems = [];
+    if (canCopy) {
+      menuItems.push({ role: "copy"});
+    }
+    if (canCut) {
+      menuItems.push({ role: "cut"});
+    }
+    if (canPaste) {
+      menuItems.push({ role: "paste"});
+    }
+    if (canSelectAll) {
+      menuItems.push({ role: "selectall"});
+    }
+    
+    if (menuItems) {
+      const contextMenu = Menu.buildFromTemplate(menuItems);
+      contextMenu.popup({ window: mainWindow });
+    }
+  });
+
 }
+
+
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
